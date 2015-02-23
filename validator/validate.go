@@ -70,6 +70,9 @@ func maxChar(val string, n int) bool {
 }
 
 func email(val string) bool {
+	if val == "" {
+		return false
+	}
 	if !emailPatern.MatchString(val) {
 		return true
 	}
@@ -94,6 +97,9 @@ func confirmVals(val, confirm string) bool {
 }
 
 func iso8601DataTime(val string) bool {
+	if val == "" {
+		return false
+	}
 	if !dateiso8601Patern.MatchString(val) {
 		return true
 	}
