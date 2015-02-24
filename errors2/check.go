@@ -8,22 +8,42 @@ func ToError2(err error) *Errors2 {
 	return nil
 }
 
-func IsNotFound(err *Errors2) bool {
-	return err.ty == NotFound
+func IsNotFound(err error) bool {
+	if e := ToError2(err); e != nil {
+		return e.ty == NotFound
+	}
+
+	return false
 }
 
 func IsInternal(err *Errors2) bool {
-	return err.ty == Internal
+	if e := ToError2(err); e != nil {
+		return e.ty == Internal
+	}
+
+	return false
 }
 
 func IsBadReq(err *Errors2) bool {
-	return err.ty == BadReq
+	if e := ToError2(err); e != nil {
+		return e.ty == BadReq
+	}
+
+	return false
 }
 
 func IsUnauthorized(err *Errors2) bool {
-	return err.ty == Unauthorized
+	if e := ToError2(err); e != nil {
+		return e.ty == Unauthorized
+	}
+
+	return false
 }
 
 func IsForbidden(err *Errors2) bool {
-	return err.ty == Forbidden
+	if e := ToError2(err); e != nil {
+		return e.ty == Forbidden
+	}
+
+	return false
 }

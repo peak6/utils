@@ -20,3 +20,12 @@ func BenchmarkToError2(b *testing.B) {
 		ToError2(err)
 	}
 }
+
+func BenchmarkIsNotFound(b *testing.B) {
+	err := NewNotFound("test")
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		IsNotFound(err)
+	}
+}
