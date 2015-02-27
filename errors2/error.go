@@ -8,6 +8,12 @@ const (
 	Forbidden
 )
 
+type Error interface {
+	Code() int
+	Error() string
+	Type() int
+}
+
 type Errors2 struct {
 	code    int    `json:"-"`
 	message string `json:"error"`
@@ -16,6 +22,14 @@ type Errors2 struct {
 
 func (err *Errors2) Error() string {
 	return err.message
+}
+
+func (err *Errors2) Code() int {
+	return err.code
+}
+
+func (err *Errors2) Type() int {
+	return err.ty
 }
 
 func NewError(code int, msg string, ty int) *Errors2 {
