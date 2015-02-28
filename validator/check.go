@@ -20,6 +20,16 @@ func (c *Check) Clear() {
 	c.err = nil
 }
 
+func (c *Check) Check(err error) {
+	if c.err != nil {
+		return
+	}
+
+	if err != nil {
+		c.err = err
+	}
+}
+
 func (c *Check) RequiredString(val string, err error) {
 	if c.err != nil {
 		return
