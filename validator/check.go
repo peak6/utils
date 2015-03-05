@@ -20,7 +20,7 @@ func (c *Check) Clear() {
 	c.err = nil
 }
 
-func (c *Check) Check(err error) {
+func (c *Check) CheckErr(err error) {
 	if c.err != nil {
 		return
 	}
