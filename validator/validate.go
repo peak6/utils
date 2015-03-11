@@ -29,6 +29,14 @@ func requiredInt(val int) bool {
 	return false
 }
 
+func requiredFloat64(val float64) bool {
+	if val == 0 {
+		return true
+	}
+
+	return false
+}
+
 func requiredBool(val bool) bool {
 	if !val {
 		return true
@@ -51,6 +59,38 @@ func requiredTime(val time.Time) bool {
 	}
 
 	return false
+}
+
+func minInt(val int, n int) bool {
+	if val < n {
+		return false
+	}
+
+	return true
+}
+
+func maxInt(val int, n int) bool {
+	if val > n {
+		return false
+	}
+
+	return true
+}
+
+func minFloat64(val float64, n float64) bool {
+	if val < n {
+		return false
+	}
+
+	return true
+}
+
+func maxFloat64(val float64, n float64) bool {
+	if val > n {
+		return false
+	}
+
+	return true
 }
 
 func minChar(val string, n int) bool {

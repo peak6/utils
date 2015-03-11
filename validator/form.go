@@ -94,6 +94,13 @@ func (f *Form) RequiredInt(val int, field string, msg ...string) {
 	}
 }
 
+func (f *Form) RequiredFloat64(val float64, field string, msg ...string) {
+	if requiredFloat64(val) {
+		f.isError = true
+		f.setMsg(field, requiredMsg, msg)
+	}
+}
+
 func (f *Form) RequiredBool(val bool, field string, msg ...string) {
 	if requiredBool(val) {
 		f.isError = true
@@ -112,6 +119,34 @@ func (f *Form) RequiredTime(val time.Time, field string, msg ...string) {
 	if requiredTime(val) {
 		f.isError = true
 		f.setMsg(field, requiredMsg, msg)
+	}
+}
+
+func (f *Form) MinInt(val int, n int, field string, msg ...string) {
+	if minInt(val, n) {
+		f.isError = true
+		f.setMsg(field, minCharMsg, msg)
+	}
+}
+
+func (f *Form) MaxInt(val int, n int, field string, msg ...string) {
+	if maxInt(val, n) {
+		f.isError = true
+		f.setMsg(field, maxCharMsg, msg)
+	}
+}
+
+func (f *Form) MaxFloat64(val float64, n float64, field string, msg ...string) {
+	if maxFloat64(val, n) {
+		f.isError = true
+		f.setMsg(field, maxCharMsg, msg)
+	}
+}
+
+func (f *Form) MinFloat64(val float64, n float64, field string, msg ...string) {
+	if minFloat64(val, n) {
+		f.isError = true
+		f.setMsg(field, minCharMsg, msg)
 	}
 }
 

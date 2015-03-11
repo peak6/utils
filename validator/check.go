@@ -50,6 +50,16 @@ func (c *Check) RequiredInt(val int, err error) {
 	}
 }
 
+func (c *Check) RequiredFloat64(val float64, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if requiredFloat64(val) {
+		c.err = err
+	}
+}
+
 func (c *Check) RequiredBool(val bool, err error) {
 	if c.err != nil {
 		return
@@ -76,6 +86,46 @@ func (c *Check) RequiredTime(val time.Time, err error) {
 	}
 
 	if requiredTime(val) {
+		c.err = err
+	}
+}
+
+func (c *Check) MinInt(val int, n int, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if minInt(val, n) {
+		c.err = err
+	}
+}
+
+func (c *Check) MaxInt(val int, n int, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if maxInt(val, n) {
+		c.err = err
+	}
+}
+
+func (c *Check) MinFloat64(val float64, n float64, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if minFloat64(val, n) {
+		c.err = err
+	}
+}
+
+func (c *Check) MaxFloat64(val float64, n float64, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if maxFloat64(val, n) {
 		c.err = err
 	}
 }
