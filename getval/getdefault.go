@@ -1,4 +1,4 @@
-package getdefault
+package getval
 
 import (
 	"time"
