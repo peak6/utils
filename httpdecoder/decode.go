@@ -3,6 +3,7 @@ package httpdecoder
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/tinylib/msgp/msgp"
 	"net/http"
 	"strings"
@@ -15,6 +16,7 @@ const (
 func DecodeRequest(r *http.Request, v interface{}) {
 	defer r.Body.Close()
 	split := strings.SplitN(r.Header.Get(contentType), ";", 1)
+	fmt.Println("split", split)
 	if len(split) < 1 {
 		panic(errors.New("unsupport content-type"))
 	}
@@ -28,9 +30,9 @@ func DecodeRequest(r *http.Request, v interface{}) {
 		panic(errors.New("unable to decode msgpack"))
 	case "application/json":
 		json.NewDecoder(r.Body).Decode(v)
+	default:
+		panic(errors.New("unsupport content-type"))
 	}
-
-	panic(errors.New("unsupport content-type"))
 }
 
 //ParseJSON decode json to interface{}
