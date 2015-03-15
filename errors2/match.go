@@ -1,6 +1,6 @@
 package errors2
 
-func Sql(err error) error {
+func Sqlx(err error) error {
 	if err == nil {
 		return nil
 	}
