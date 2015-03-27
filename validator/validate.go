@@ -45,6 +45,14 @@ func requiredBool(val bool) bool {
 	return false
 }
 
+func requireEmail(e string) bool {
+	if e == "" {
+		return true
+	}
+
+	return email(e)
+}
+
 func notNil(val interface{}) bool {
 	if val == nil {
 		return true

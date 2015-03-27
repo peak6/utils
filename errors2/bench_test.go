@@ -8,12 +8,12 @@ func BenchmarkNewError2(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		NewInternal("test")
+		NewInternal("t", "test")
 	}
 }
 
 func BenchmarkToError2(b *testing.B) {
-	err := NewInternal("test")
+	err := NewInternal("t", "test")
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -22,7 +22,7 @@ func BenchmarkToError2(b *testing.B) {
 }
 
 func BenchmarkIsNotFound(b *testing.B) {
-	err := NewNotFound("test")
+	err := NewNotFound("t", "test")
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

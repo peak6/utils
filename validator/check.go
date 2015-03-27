@@ -70,6 +70,16 @@ func (c *Check) RequiredBool(val bool, err error) {
 	}
 }
 
+func (c *Check) RequiredEmail(val string, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if requireEmail(val) {
+		c.err = err
+	}
+}
+
 func (c *Check) NotNil(val interface{}, err error) {
 	if c.err != nil {
 		return

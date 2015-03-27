@@ -8,9 +8,17 @@ func ToError2(err error) *Errors2 {
 	return nil
 }
 
-func RespError(err error) (int, string) {
+func RespError(err error) (int, *Errors2) {
 	e := ToError2(err)
-	return e.code, e.message
+	return e.httpStatus, e
+}
+
+func NotFoundORInternal(err, notfound, internal error) error {
+	if IsNotFound(err) {
+		return notfound
+	}
+
+	return internal
 }
 
 func IsNotFound(err error) bool {

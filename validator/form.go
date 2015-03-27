@@ -108,6 +108,13 @@ func (f *Form) RequiredBool(val bool, field string, msg ...string) {
 	}
 }
 
+func (f *Form) RequiredEmail(val string, field string, msg ...string) {
+	if requireEmail(val) {
+		f.isError = true
+		f.setMsg(field, requiredMsg, msg)
+	}
+}
+
 func (f *Form) NotNil(val interface{}, field string, msg ...string) {
 	if notNil(val) {
 		f.isError = true
