@@ -33,6 +33,10 @@ func (err *Errors2) Type() int {
 	return err.ty
 }
 
+func NewAnyError() error {
+	return NewError(500, "", "any error", Internal)
+}
+
 func NewError(status int, code, msg string, ty int) *Errors2 {
 	return &Errors2{status, "", msg, ty}
 }
