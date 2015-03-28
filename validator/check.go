@@ -4,9 +4,12 @@ import (
 	"time"
 )
 
-//go:generate mockery -name CheckInterface
+//go:generate mockery -name CheckValidator
 
-type CheckInterface interface {
+type CheckValidator interface {
+	GetError() error
+	Clear()
+	CheckErr(err error)
 	RequiredString(val string, err error)
 	RequiredInt(val int, err error)
 	RequiredFloat64(val float64, err error)

@@ -8,7 +8,7 @@ import (
 	"github.com/plimble/utils/strings2"
 )
 
-//go:generate mockery -name FormInterface
+//go:generate mockery -name FormValidator
 
 const (
 	requiredMsg = ` is required`
@@ -22,7 +22,13 @@ const (
 	confirmMsg  = ` doesn't match`
 )
 
-type FormInterface interface {
+type FormValidator interface {
+	Clear()
+	HasError() bool
+	AddError(field, msg string)
+	Messages() map[string]string
+	Message() string
+	Error() error
 	RequiredString(val string, field string, msg ...string)
 	RequiredInt(val int, field string, msg ...string)
 	RequiredFloat64(val float64, field string, msg ...string)
