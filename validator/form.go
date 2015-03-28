@@ -2,10 +2,13 @@ package validator
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/plimble/utils/errors2"
 	"github.com/plimble/utils/strings2"
-	"time"
 )
+
+//go:generate mockery -name FormInterface
 
 const (
 	requiredMsg = ` is required`
@@ -18,6 +21,27 @@ const (
 	emptyMsg    = ` is empty`
 	confirmMsg  = ` doesn't match`
 )
+
+type FormInterface interface {
+	RequiredString(val string, field string, msg ...string)
+	RequiredInt(val int, field string, msg ...string)
+	RequiredFloat64(val float64, field string, msg ...string)
+	RequiredBool(val bool, field string, msg ...string)
+	RequiredEmail(val string, field string, msg ...string)
+	NotNil(val interface{}, field string, msg ...string)
+	RequiredTime(val time.Time, field string, msg ...string)
+	MinInt(val int, n int, field string, msg ...string)
+	MaxInt(val int, n int, field string, msg ...string)
+	MaxFloat64(val float64, n float64, field string, msg ...string)
+	MinFloat64(val float64, n float64, field string, msg ...string)
+	MinChar(val string, n int, field string, msg ...string)
+	MaxChar(val string, n int, field string, msg ...string)
+	Email(val, field string, msg ...string)
+	Gender(val, field string, msg ...string)
+	Confirm(val, confirm, field string, msg ...string)
+	ISO8601DataTime(val, field string, msg ...string)
+	InString(val string, in []string, field string, msg ...string)
+}
 
 type Form struct {
 	messages map[string]string

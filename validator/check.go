@@ -4,6 +4,29 @@ import (
 	"time"
 )
 
+//go:generate mockery -name CheckInterface
+
+type CheckInterface interface {
+	RequiredString(val string, err error)
+	RequiredInt(val int, err error)
+	RequiredFloat64(val float64, err error)
+	RequiredBool(val bool, err error)
+	RequiredEmail(val string, err error)
+	NotNil(val interface{}, err error)
+	RequiredTime(val time.Time, err error)
+	MinInt(val int, n int, err error)
+	MaxInt(val int, n int, err error)
+	MinFloat64(val float64, n float64, err error)
+	MaxFloat64(val float64, n float64, err error)
+	MinChar(val string, n int, err error)
+	MaxChar(val string, n int, err error)
+	Email(val string, err error)
+	Gender(val string, err error)
+	Confirm(val, confirm string, err error)
+	ISO8601DataTime(val string, err error)
+	InString(val string, in []string, err error)
+}
+
 type Check struct {
 	err error
 }
