@@ -130,5 +130,11 @@ func (a *ASSingle) MGet(policy *aerospike.BasePolicy, set string, keys ...string
 		return nil, errors2.NewInternal(err.Error())
 	}
 
+	for i, record := range records {
+		if record == nil {
+			records = append(records[:i], records[i+1:]...)
+		}
+	}
+
 	return NewIterator(records), nil
 }

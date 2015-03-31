@@ -116,12 +116,12 @@ func (t *ASSingleSuite) TestMGet() {
 
 	it, err := t.as.MGet(nil, "access_token", "1", "2", "4", "3")
 	t.NoError(err)
+	t.Equal(3, it.Size())
 
-	i := 0
-	getData := DataTest{}
-	for it.Next(&getData) {
-		t.Equal(t.data, getData)
-		i++
+	list := make([]DataTest, it.Size())
+	for i := 0; i < it.Size(); i++ {
+		list[i] = DataTest{}
+		it.Scan(&list[i])
+		t.Equal(t.data, list[i])
 	}
-	t.Equal(3, i)
 }
