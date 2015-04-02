@@ -1,7 +1,6 @@
 package string2
 
 import (
-	"bytes"
 	"reflect"
 	"unsafe"
 )
@@ -18,26 +17,42 @@ func StringToBytes(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&bh))
 }
 
-// func Concat(s ...string) string {
-//   size := 0
-//   for i := 0; i < len(s); i++ {
-//     size += len(s[i])
-//   }
-
-//   buf := make([]byte, 0, size)
-
-//   for i := 0; i < len(s); i++ {
-//     buf = append(buf, StringToBytes(s[i])...)
-//   }
-
-//   return BytesToString(buf)
-// }
-
 func Concat(s ...string) string {
-	buf := &bytes.Buffer{}
+	size := 0
 	for i := 0; i < len(s); i++ {
-		buf.WriteString(s[i])
+		size += len(s[i])
 	}
 
-	return buf.String()
+	buf := make([]byte, 0, size)
+
+	for i := 0; i < len(s); i++ {
+		buf = append(buf, StringToBytes(s[i])...)
+	}
+
+	return BytesToString(buf)
 }
+
+func ConcatBase(base string, s ...string) string {
+	size := len(base)
+	for i := 0; i < len(s); i++ {
+		size += len(s[i])
+	}
+
+	buf := make([]byte, 0, size)
+	buf = append(buf, StringToBytes(base)...)
+
+	for i := 0; i < len(s); i++ {
+		buf = append(buf, StringToBytes(s[i])...)
+	}
+
+	return BytesToString(buf)
+}
+
+// func Concat(s ...string) string {
+// 	buf := &bytes.Buffer{}
+// 	for i := 0; i < len(s); i++ {
+// 		buf.WriteString(s[i])
+// 	}
+
+// 	return buf.String()
+// }
