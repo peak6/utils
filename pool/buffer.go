@@ -29,7 +29,7 @@ func (p *BufferPool) Get() *bytes.Buffer {
 	case b := <-p.list:
 		return b
 	default:
-		return bytes.NewBuffer([]byte{})
+		return &bytes.Buffer{}
 	}
 
 	return nil
