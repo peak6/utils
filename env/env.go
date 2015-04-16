@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func envS(key, def string) string {
+func String(key, def string) string {
 	v := os.Getenv(key)
 	if v == "" {
 		return def
@@ -14,7 +14,7 @@ func envS(key, def string) string {
 	return v
 }
 
-func envI(key string, def int) int {
+func Int(key string, def int) int {
 	v := os.Getenv(key)
 	if v == "" {
 		return def
