@@ -9,7 +9,7 @@ const (
 )
 
 type Error interface {
-	Code() int
+	HttpStatus() int
 	Error() string
 	Type() int
 }
@@ -85,4 +85,10 @@ func NewUnauthorizedCode(code, msg string) *Errors2 {
 
 func NewForbiddenCode(code, msg string) *Errors2 {
 	return &Errors2{403, code, msg, Forbidden}
+}
+
+func Panic(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
