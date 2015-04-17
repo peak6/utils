@@ -16,13 +16,17 @@ type Error interface {
 
 type Errors2 struct {
 	httpStatus int    `json:"-"`
-	err        string `json:"error,omitempty"`
-	message    string `json:"message"`
+	Err        string `json:"error,omitempty"`
+	Message    string `json:"message"`
 	ty         int    `json:"-"`
 }
 
 func (err *Errors2) Error() string {
-	return err.message
+	return err.Message
+}
+
+func (err *Errors2) Title() string {
+	return err.Err
 }
 
 func (err *Errors2) HttpStatus() int {
