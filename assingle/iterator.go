@@ -4,25 +4,31 @@ import (
 	"github.com/aerospike/aerospike-client-go"
 	"github.com/plimble/utils/errors2"
 	"github.com/tinylib/msgp/msgp"
+	"sync"
 )
 
 type Iterator struct {
-	record []*aerospike.Record
-	index  int
-	size   int
-	err    error
-}
-
-func NewIterator(records []*aerospike.Record) *Iterator {
-	return &Iterator{records, 0, len(records), nil}
+	records   []*aerospike.Record
+	recordLen int
+	index     int
+	size      int
+	err       error
+	itrPool   *sync.Pool
 }
 
 func (it *Iterator) Scan(val msgp.Unmarshaler) bool {
-	if it.size < it.index+1 {
+	if it.err != nil {
 		return false
 	}
 
-	_, err := val.UnmarshalMsg(it.record[it.index].Bins[""].([]byte))
+	for i := it.index; i < it.recordLen; i++ {
+		if it.records[i] != nil {
+			it.index = i
+			break
+		}
+	}
+
+	_, err := val.UnmarshalMsg(it.records[it.index].Bins[""].([]byte))
 	if err != nil {
 		it.err = errors2.NewInternal(err.Error())
 		return false
@@ -33,7 +39,8 @@ func (it *Iterator) Scan(val msgp.Unmarshaler) bool {
 	return true
 }
 
-func (it *Iterator) GetError() error {
+func (it *Iterator) Close() error {
+	defer it.itrPool.Put(it)
 	return it.err
 }
 

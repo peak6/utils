@@ -3,7 +3,9 @@ package assingle
 import (
 	"github.com/aerospike/aerospike-client-go"
 	"github.com/plimble/utils/errors2"
+	"github.com/plimble/utils/pool"
 	"github.com/tinylib/msgp/msgp"
+	"sync"
 )
 
 var (
@@ -13,12 +15,28 @@ var (
 )
 
 type ASSingle struct {
-	client *aerospike.Client
-	ns     string
+	client   *aerospike.Client
+	ns       string
+	pool     *pool.BufferPool
+	iterPool *sync.Pool
 }
 
-func New(client *aerospike.Client, ns string) *ASSingle {
-	return &ASSingle{client, ns}
+func New(client *aerospike.Client, ns string, poolSize int) *ASSingle {
+	as := &ASSingle{
+		client: client,
+		ns:     ns,
+		pool:   pool.NewBufferPool(poolSize),
+	}
+
+	as.iterPool = &sync.Pool{}
+
+	as.iterPool.New = func() interface{} {
+		return &Iterator{
+			itrPool: as.iterPool,
+		}
+	}
+
+	return as
 }
 
 func (a *ASSingle) Close() {
@@ -130,11 +148,17 @@ func (a *ASSingle) MGet(policy *aerospike.BasePolicy, set string, keys ...string
 		return nil, errors2.NewInternal(err.Error())
 	}
 
-	for i, record := range records {
-		if record == nil {
-			records = append(records[:i], records[i+1:]...)
+	it := a.iterPool.Get().(*Iterator)
+	it.index = 0
+	it.size = 0
+	it.recordLen = len(records)
+	it.records = records
+
+	for i := 0; i < it.recordLen; i++ {
+		if records[i] != nil {
+			it.size++
 		}
 	}
 
-	return NewIterator(records), nil
+	return it, nil
 }

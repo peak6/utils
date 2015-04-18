@@ -19,7 +19,7 @@ func TestASSingleSuite(t *testing.T) {
 }
 
 func (t *ASSingleSuite) SetupSuite() {
-	client, err := aerospike.NewClient("172.17.8.101", 3000)
+	client, err := aerospike.NewClient("192.168.99.100", 3000)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func (t *ASSingleSuite) SetupSuite() {
 }
 
 func (t *ASSingleSuite) SetupTest() {
-	t.as = New(t.client, "test")
+	t.as = New(t.client, "test", 512)
 }
 
 func (t *ASSingleSuite) TearDownTest() {
@@ -114,7 +114,7 @@ func (t *ASSingleSuite) TestMGet() {
 	err = t.as.Put(nil, "access_token", "3", &t.data)
 	t.NoError(err)
 
-	it, err := t.as.MGet(nil, "access_token", "1", "2", "4", "3")
+	it, err := t.as.MGet(nil, "access_token", "0", "1", "2", "4", "3")
 	t.NoError(err)
 	t.Equal(3, it.Size())
 
@@ -124,4 +124,6 @@ func (t *ASSingleSuite) TestMGet() {
 		it.Scan(&list[i])
 		t.Equal(t.data, list[i])
 	}
+
+	t.NoError(it.Close())
 }
