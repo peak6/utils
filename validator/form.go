@@ -107,9 +107,7 @@ func (f *Form) Message() string {
 }
 
 func (f *Form) Close() {
-	for key := range f.messages {
-		delete(f.messages, key)
-	}
+	f.messages = nil
 	f.isError = false
 	formPool.Put(f)
 }

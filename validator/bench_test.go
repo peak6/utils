@@ -1,69 +1,71 @@
 package validator
 
 import (
+	"errors"
 	"testing"
 )
 
+var errTest = errors.New("error")
+
 func BenchmarkRequire(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.RequiredString("", `name`)
-		v.Messages()
+		v := NewCheck()
+		v.RequiredString("val", errTest)
 	}
 }
 
 func BenchmarkMinChar(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.MinChar("s", 2, "email")
+		v := NewCheck()
+		v.MinChar("s", 2, errTest)
 	}
 }
 
 func BenchmarkEmail(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.Email(`test@test.com`, `email`)
+		v := NewCheck()
+		v.Email("test@test.com", errTest)
 	}
 }
 
 func BenchmarkGender(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.Gender(`test`, `name`)
+		v := NewCheck()
+		v.Gender("test", errTest)
 	}
 }
 
 func BenchmarkConfirm(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.Confirm("123", "321", "sss")
+		v := NewCheck()
+		v.Confirm("123", "321", errTest)
 	}
 }
 
 func BenchmarkISO8601DataTime(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.ISO8601DataTime(`2014-04-18T10:47:23+07:00`, "ddd")
+		v := NewCheck()
+		v.ISO8601DataTime(`2014-04-18T10:47:23+07:00`, errTest)
 	}
 }
 
 func BenchmarkInString(b *testing.B) {
-	v := NewForm()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		v.InString("222", []string{"1", "2", "3", "4"}, "asd")
+		v := NewCheck()
+		v.InString("222", []string{"1", "2", "3", "4"}, errTest)
 	}
 }

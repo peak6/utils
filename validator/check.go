@@ -7,7 +7,6 @@ import (
 //go:generate mockery -name CheckValidator
 
 type CheckValidator interface {
-	Close()
 	GetError() error
 	Clear()
 	CheckErr(err error)
@@ -36,7 +35,7 @@ type Check struct {
 }
 
 func NewCheck() *Check {
-	return checkPool.Get().(*Check)
+	return &Check{}
 }
 
 func (c *Check) GetError() error {
@@ -45,11 +44,6 @@ func (c *Check) GetError() error {
 
 func (c *Check) Clear() {
 	c.err = nil
-}
-
-func (c *Check) Close() {
-	c.err = nil
-	checkPool.Put(c)
 }
 
 func (c *Check) CheckErr(err error) {
