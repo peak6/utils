@@ -4,9 +4,9 @@ import (
 	"time"
 )
 
-//go:generate mockery -name CheckValidator
+//go:generate mockery -name Checker
 
-type CheckValidator interface {
+type Checker interface {
 	GetError() error
 	Clear()
 	CheckErr(err error)
