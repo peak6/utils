@@ -12,6 +12,9 @@ func NewMockFormValidator() *MockFormValidator {
 	return &MockFormValidator{}
 }
 
+func (m *MockFormValidator) Close() {
+	m.Called()
+}
 func (m *MockFormValidator) Clear() {
 	m.Called()
 }

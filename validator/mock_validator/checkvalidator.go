@@ -12,6 +12,9 @@ func NewMockCheckValidator() *MockCheckValidator {
 	return &MockCheckValidator{}
 }
 
+func (m *MockCheckValidator) Close() {
+	m.Called()
+}
 func (m *MockCheckValidator) GetError() error {
 	ret := m.Called()
 

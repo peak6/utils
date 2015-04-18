@@ -9,6 +9,7 @@ import (
 func TestRequiredString(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.RequiredString(``, "name")
 	assert.True(v.HasError())
 
@@ -20,6 +21,7 @@ func TestRequiredString(t *testing.T) {
 func TestRequiredInt(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.RequiredInt(0, "name")
 	assert.True(v.HasError())
 
@@ -31,6 +33,7 @@ func TestRequiredInt(t *testing.T) {
 func TestRequiredBool(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.RequiredBool(false, "name")
 	assert.True(v.HasError())
 
@@ -42,6 +45,7 @@ func TestRequiredBool(t *testing.T) {
 func TestRequiredTime(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.RequiredTime(time.Time{}, "name")
 	assert.True(v.HasError())
 
@@ -54,6 +58,7 @@ func TestRequiredTime(t *testing.T) {
 func TestNotNil(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.NotNil(nil, "name")
 	assert.True(v.HasError())
 
@@ -65,6 +70,7 @@ func TestNotNil(t *testing.T) {
 func TestMinChar(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.MinChar("ssss", 10, "name")
 	assert.True(v.HasError())
 
@@ -76,6 +82,7 @@ func TestMinChar(t *testing.T) {
 func TestEmail(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.Email("rerer@ddsds", "name")
 	assert.True(v.HasError())
 
@@ -87,6 +94,7 @@ func TestEmail(t *testing.T) {
 func TestGender(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.Gender("ddd", "name")
 	assert.True(v.HasError())
 
@@ -98,6 +106,7 @@ func TestGender(t *testing.T) {
 func TestConfirm(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.Gender("ddd", "name")
 	assert.True(v.HasError())
 
@@ -109,6 +118,7 @@ func TestConfirm(t *testing.T) {
 func TestISO8601DataTime(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.ISO8601DataTime("2014-04-18", "name")
 	assert.True(v.HasError())
 
@@ -124,6 +134,7 @@ func TestISO8601DataTime(t *testing.T) {
 func TestInString(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.InString("ddd", []string{"a", "b", "c"}, "name")
 	assert.True(v.HasError())
 
@@ -135,6 +146,7 @@ func TestInString(t *testing.T) {
 func TestErrorMessages(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.RequiredString(``, "name")
 	v.RequiredString(``, "jack")
 	v.Email("tttt", "email")
@@ -149,6 +161,7 @@ func TestErrorMessages(t *testing.T) {
 func TestAddError(t *testing.T) {
 	assert := assert.New(t)
 	v := NewForm()
+	defer v.Close()
 	v.AddError("name", "name is error")
 	assert.True(v.HasError())
 	assert.Equal("name is error", v.Message())

@@ -23,6 +23,7 @@ const (
 )
 
 type FormValidator interface {
+	Close()
 	Clear()
 	HasError() bool
 	AddError(field, msg string)
@@ -55,7 +56,7 @@ type Form struct {
 }
 
 func NewForm() *Form {
-	return &Form{}
+	return formPool.Get().(*Form)
 }
 
 func (f *Form) setMsg(field, defaultMsg string, msg []string) {
@@ -103,6 +104,14 @@ func (f *Form) Message() string {
 	}
 
 	return ""
+}
+
+func (f *Form) Close() {
+	for key := range f.messages {
+		delete(f.messages, key)
+	}
+	f.isError = false
+	formPool.Put(f)
 }
 
 func (f *Form) Error() error {
