@@ -155,6 +155,14 @@ func iso8601DataTime(val string) bool {
 	return false
 }
 
+func length(val int, atleast int) bool {
+	if val <= atleast {
+		return true
+	}
+
+	return false
+}
+
 func inString(val string, in []string) bool {
 	for _, k := range in {
 		if k == val {

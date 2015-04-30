@@ -28,6 +28,7 @@ type Checker interface {
 	Confirm(val, confirm string, err error)
 	ISO8601DataTime(val string, err error)
 	InString(val string, in []string, err error)
+	Length(val int, atleast int, err error)
 }
 
 type Check struct {
@@ -222,6 +223,16 @@ func (c *Check) ISO8601DataTime(val string, err error) {
 	}
 
 	if iso8601DataTime(val) {
+		c.err = err
+	}
+}
+
+func (c *Check) Length(val int, atleast int, err error) {
+	if c.err != nil {
+		return
+	}
+
+	if length(val, atleast) {
 		c.err = err
 	}
 }

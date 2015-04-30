@@ -48,6 +48,7 @@ type Former interface {
 	Confirm(val, confirm, field string, msg ...string)
 	ISO8601DataTime(val, field string, msg ...string)
 	InString(val string, in []string, field string, msg ...string)
+	Length(val int, atleast int, field string, msg ...string)
 }
 
 type Form struct {
@@ -238,6 +239,13 @@ func (f *Form) ISO8601DataTime(val, field string, msg ...string) {
 
 func (f *Form) InString(val string, in []string, field string, msg ...string) {
 	if inString(val, in) {
+		f.isError = true
+		f.setMsg(field, inMsg, msg)
+	}
+}
+
+func (f *Form) Length(val int, atleast int, field string, msg ...string) {
+	if length(val, atleast) {
 		f.isError = true
 		f.setMsg(field, inMsg, msg)
 	}
