@@ -106,3 +106,6 @@ func (m *MockFormer) ISO8601DataTime(val string, field string, msg ...string) {
 func (m *MockFormer) InString(val string, in []string, field string, msg ...string) {
 	m.Called(val, in, field, msg)
 }
+func (m *MockFormer) Length(val int, atleast int, field string, msg ...string) {
+	m.Called(val, atleast, field, msg)
+}

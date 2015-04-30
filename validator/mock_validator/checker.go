@@ -79,3 +79,6 @@ func (m *MockChecker) ISO8601DataTime(val string, err error) {
 func (m *MockChecker) InString(val string, in []string, err error) {
 	m.Called(val, in, err)
 }
+func (m *MockChecker) Length(val int, atleast int, err error) {
+	m.Called(val, atleast, err)
+}
