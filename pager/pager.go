@@ -29,7 +29,7 @@ func Page(limit, skip, total int) (int, int) {
 	return int(math.Ceil(page)), int(totalPage)
 }
 
-func PageToOffset(limit, page int) int {
+func Offset(limit, page int) int {
 	if page == 1 {
 		page = 2
 	}

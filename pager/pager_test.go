@@ -18,7 +18,7 @@ func TestGetPage(t *testing.T) {
 }
 
 func TestPageToRange(t *testing.T) {
-	o := PageToRange(3, 2)
+	o := Offset(3, 2)
 	assert.Equal(t, 3, o)
 }
 
