@@ -29,10 +29,11 @@ func Page(limit, skip, total int) (int, int) {
 }
 
 func Offset(limit, page int) int {
-	if page < 0 {
-		page = 1
+	if page < 2 {
+		return 0
 	}
-	return (page - 1) * limit
+
+	return ((page - 1) * limit) + 1
 }
 
 func New(limit, skip, total int, items interface{}) *Pager {
