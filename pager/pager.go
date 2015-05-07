@@ -33,7 +33,7 @@ func Offset(limit, page int) int {
 		return 0
 	}
 
-	return ((page - 1) * limit) + 1
+	return (page - 1) * limit
 }
 
 func New(limit, skip, total int, items interface{}) *Pager {
