@@ -6,7 +6,6 @@ import (
 
 type Pager struct {
 	Total     int         `json:"total"`
-	Count     int         `json:"count"`
 	CurPage   int         `json:"cur_page"`
 	TotalPage int         `json:"total_page"`
 	Items     interface{} `json:"items"`
@@ -36,11 +35,10 @@ func Offset(limit, page int) int {
 	return (page - 1) * limit
 }
 
-func New(limit, skip, total, count int, items interface{}) *Pager {
+func New(limit, skip, total int, items interface{}) *Pager {
 	curPage, totalPage := Page(limit, skip, total)
 	return &Pager{
 		Total:     total,
-		Count:     count,
 		CurPage:   curPage,
 		TotalPage: totalPage,
 		Items:     items,
