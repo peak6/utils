@@ -22,7 +22,7 @@ func Page(limit, skip, total int) (int, int) {
 		skip = 1
 	}
 
-	totalPage = (float64(total) / float64(limit))
+	totalPage = math.Ceil((float64(total) / float64(limit)))
 	page = float64(skip) * totalPage / float64(total)
 
 	return int(math.Ceil(page)), int(totalPage)

@@ -15,6 +15,9 @@ func TestGetPage(t *testing.T) {
 	c, p = Page(10, 21, 0)
 	assert.Equal(t, 0, c)
 	assert.Equal(t, 0, p)
+	c, p = Page(10, 0, 1)
+	assert.Equal(t, 1, c)
+	assert.Equal(t, 1, p)
 }
 
 func TestPageToRange(t *testing.T) {
