@@ -20,6 +20,8 @@ func TestGetPage(t *testing.T) {
 func TestPageToRange(t *testing.T) {
 	o := Offset(3, 2)
 	assert.Equal(t, 3, o)
+	o = Offset(10, 1)
+	assert.Equal(t, 0, o)
 }
 
 func BenchmarkGetPage(b *testing.B) {

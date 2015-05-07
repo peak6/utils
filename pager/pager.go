@@ -29,8 +29,8 @@ func Page(limit, skip, total int) (int, int) {
 }
 
 func Offset(limit, page int) int {
-	if page == 1 {
-		page = 2
+	if page < 0 {
+		page = 1
 	}
 	return (page - 1) * limit
 }
