@@ -14,10 +14,10 @@ type Pager struct {
 //GetPagination return total page and current page
 func Page(limit, skip, total int) (int, int) {
 	if total == 0 {
-		return 0, 0
+		return 1, 1
 	}
 	if skip > total {
-		return 0, 0
+		return 1, 1
 	}
 
 	var page, totalPage float64
@@ -41,7 +41,7 @@ func Offset(limit, page int) int {
 
 func New(limit, skip, total int, items interface{}) *Pager {
 	curPage, totalPage := Page(limit, skip, total)
-	if curPage == 0 {
+	if skip > total {
 		total = 0
 	}
 
