@@ -16,6 +16,9 @@ func Page(limit, skip, total int) (int, int) {
 	if total == 0 {
 		return 0, 0
 	}
+	if skip > total {
+		return 0, 0
+	}
 
 	var page, totalPage float64
 	if skip == 0 {
@@ -38,6 +41,10 @@ func Offset(limit, page int) int {
 
 func New(limit, skip, total int, items interface{}) *Pager {
 	curPage, totalPage := Page(limit, skip, total)
+	if curPage == 0 {
+		total = 0
+	}
+
 	return &Pager{
 		Total:     total,
 		CurPage:   curPage,
