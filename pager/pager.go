@@ -39,7 +39,7 @@ func Offset(limit, page int) int {
 	return (page - 1) * limit
 }
 
-func New(limit, skip, total int, items interface{}) *Pager {
+func New(limit, skip, total int) *Pager {
 	curPage, totalPage := Page(limit, skip, total)
 	if skip > total {
 		total = 0
@@ -49,6 +49,5 @@ func New(limit, skip, total int, items interface{}) *Pager {
 		Total:     total,
 		CurPage:   curPage,
 		TotalPage: totalPage,
-		Items:     items,
 	}
 }
