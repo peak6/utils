@@ -2,7 +2,6 @@ package parsetype
 
 import (
 	"fmt"
-	"github.com/kr/pretty"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -146,8 +145,6 @@ func (p *Parser) parseTypeSpec(packname string, file *File, astType *ast.TypeSpe
 	t.Doc = astType.Doc
 	p.parseType(packname, file, t, astType.Type)
 	p.Types[name] = t
-
-	pretty.Println(t)
 
 	return p.Types[name]
 }
