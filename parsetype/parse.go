@@ -45,7 +45,6 @@ type Type struct {
 	RefTypeName string
 	IsPointer   bool
 	composite   []string
-	isComposite bool
 }
 
 func NewParser() *Parser {
@@ -233,21 +232,48 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 		t.Type = "struct"
 		t.Properties = make(map[string]*Type)
 		for j := 0; j < len(expr.Fields.List); j++ {
-			fieldType := &Type{}
-			fieldType.Name, fieldType.isComposite = p.readPropName(packname, file, expr.Fields.List[j])
-			fieldType.Doc = expr.Fields.List[j].Doc
-			fieldType.Comment = expr.Fields.List[j].Comment
-			if expr.Fields.List[j].Tag != nil {
-				fieldType.Tags = reflect.StructTag(strings.Trim(expr.Fields.List[j].Tag.Value, "`"))
-			}
+			field := expr.Fields.List[j]
 
-			// composite out side pkg
-			if fieldType.isComposite {
-				t.composite = append(t.composite, fieldType.Name)
-				p.useComposite = append(p.useComposite, t)
-			} else {
-				p.parseType(packname, file, fieldType, expr.Fields.List[j].Type)
-				t.Properties[fieldType.Name] = fieldType
+			switch {
+			case len(field.Names) == 0:
+				propName := ""
+				if astSelectorExpr, ok := field.Type.(*ast.SelectorExpr); ok {
+					fieldPackName := astSelectorExpr.X.(*ast.Ident).Name
+					//check is alias
+					for key, val := range file.Alias {
+						if key == fieldPackName {
+							fieldPackName = val
+						}
+					}
+					propName = fieldPackName + "." + strings.TrimPrefix(astSelectorExpr.Sel.Name, "*")
+				} else if astTypeIdent, ok := field.Type.(*ast.Ident); ok {
+					propName = packname + "." + astTypeIdent.Name
+				} else if astStarExpr, ok := field.Type.(*ast.StarExpr); ok {
+					if astSelectorExpr, ok := astStarExpr.X.(*ast.SelectorExpr); ok {
+						fieldPackName := astSelectorExpr.X.(*ast.Ident).Name
+						//check is alias
+						for key, val := range file.Alias {
+							if key == fieldPackName {
+								fieldPackName = val
+							}
+						}
+						propName = fieldPackName + "." + strings.TrimPrefix(astSelectorExpr.Sel.Name, "*")
+					}
+
+					if astIdent, ok := astStarExpr.X.(*ast.Ident); ok {
+						propName = packname + "." + astIdent.Name
+					}
+				} else {
+					panic(fmt.Errorf("Something goes wrong: %#v", field.Type))
+				}
+
+				p.parseProp(packname, file, t, field, propName, true)
+			case len(field.Names) > 0:
+				for i := 0; i < len(field.Names); i++ {
+					p.parseProp(packname, file, t, field, field.Names[i].String(), false)
+				}
+			default:
+				p.parseProp(packname, file, t, field, field.Names[0].String(), false)
 			}
 		}
 	default:
@@ -255,43 +281,24 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 	}
 }
 
-func (p *Parser) readPropName(packname string, file *File, field *ast.Field) (string, bool) {
-	if len(field.Names) == 0 {
-		propName := ""
-		if astSelectorExpr, ok := field.Type.(*ast.SelectorExpr); ok {
-			fieldPackName := astSelectorExpr.X.(*ast.Ident).Name
-			//check is alias
-			for key, val := range file.Alias {
-				if key == fieldPackName {
-					fieldPackName = val
-				}
-			}
-			propName = fieldPackName + "." + strings.TrimPrefix(astSelectorExpr.Sel.Name, "*")
-		} else if astTypeIdent, ok := field.Type.(*ast.Ident); ok {
-			propName = packname + "." + astTypeIdent.Name
-		} else if astStarExpr, ok := field.Type.(*ast.StarExpr); ok {
-			if astSelectorExpr, ok := astStarExpr.X.(*ast.SelectorExpr); ok {
-				fieldPackName := astSelectorExpr.X.(*ast.Ident).Name
-				//check is alias
-				for key, val := range file.Alias {
-					if key == fieldPackName {
-						fieldPackName = val
-					}
-				}
-				propName = fieldPackName + "." + strings.TrimPrefix(astSelectorExpr.Sel.Name, "*")
-			}
-
-			if astIdent, ok := astStarExpr.X.(*ast.Ident); ok {
-				propName = packname + "." + astIdent.Name
-			}
-		} else {
-			panic(fmt.Errorf("Something goes wrong: %#v", field.Type))
-		}
-
-		return propName, true
+func (p *Parser) parseProp(packname string, file *File, t *Type, astField *ast.Field, propName string, isComposite bool) {
+	fieldType := &Type{}
+	fieldType.Name = propName
+	fieldType.Doc = astField.Doc
+	fieldType.Comment = astField.Comment
+	if astField.Tag != nil {
+		fieldType.Tags = reflect.StructTag(strings.Trim(astField.Tag.Value, "`"))
 	}
 
-	return field.Names[0].String(), false
+	// composite out side pkg
+	if isComposite {
+		t.composite = append(t.composite, fieldType.Name)
+		p.useComposite = append(p.useComposite, t)
+	} else {
+		p.parseType(packname, file, fieldType, astField.Type)
+		t.Properties[fieldType.Name] = fieldType
+	}
+
 }
 
 var basicTypes = map[string]bool{
