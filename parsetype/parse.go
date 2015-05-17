@@ -7,12 +7,14 @@ import (
 	"go/token"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 )
 
 type Parser struct {
-	Packages map[string]*Package
-	Types    map[string]*Type
+	Packages     map[string]*Package
+	Types        map[string]*Type
+	useComposite []*Type
 }
 
 type Package struct {
@@ -37,11 +39,13 @@ type Type struct {
 	ArrayType   *Type
 	MapKey      string
 	MapType     *Type
-	Tags        map[string]string
+	Tags        reflect.StructTag
 	RefType     *Type
 	RefPackage  string
 	RefTypeName string
 	IsPointer   bool
+	composite   []string
+	isComposite bool
 }
 
 func NewParser() *Parser {
@@ -51,21 +55,36 @@ func NewParser() *Parser {
 	}
 }
 
-func (p *Parser) ParseDir(dir string) {
-	fset := token.NewFileSet()
-	packages, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
-	if err != nil {
-		panic(err)
+func (p *Parser) MergeComposite() {
+	for i := 0; i < len(p.useComposite); i++ {
+		for j := 0; j < len(p.useComposite[i].composite); j++ {
+			if p.Types[p.useComposite[i].composite[j]] != nil {
+				for key, val := range p.Types[p.useComposite[i].composite[j]].Properties {
+					p.useComposite[i].Properties[key] = val
+				}
+			}
+		}
 	}
+}
 
-	p.parse(dir, packages)
+func (p *Parser) ParseDir(dir string) {
+	if _, ok := p.Packages[dir]; !ok {
+		fset := token.NewFileSet()
+		packages, err := parser.ParseDir(fset, dir, nil, parser.ParseComments)
+		if err != nil {
+			// logrus.Warnln(err)
+			return
+		}
+
+		p.parse(dir, packages)
+	}
 }
 
 func (p *Parser) trimGoPath(s string) string {
 	paths := os.Getenv("GOPATH")
 	goPaths := strings.Split(paths, ":")
 	for i := 0; i < len(goPaths); i++ {
-		if strings.Contains(s, goPaths[i]) {
+		if strings.HasPrefix(s, goPaths[i]) {
 			return strings.TrimPrefix(s, path.Join(goPaths[i], "src")+"/")
 		}
 	}
@@ -73,7 +92,7 @@ func (p *Parser) trimGoPath(s string) string {
 	return s
 }
 
-func (p *Parser) parseFromGoPath(dir string) {
+func (p *Parser) ParseFromGoPath(dir string) {
 	paths := os.Getenv("GOPATH")
 	goPaths := strings.Split(paths, ":")
 	for i := 0; i < len(goPaths); i++ {
@@ -87,6 +106,10 @@ func (p *Parser) parse(dir string, packages map[string]*ast.Package) {
 			return
 		}
 
+		if strings.Contains(astPackage.Name, "_test") {
+			continue
+		}
+
 		pack := &Package{
 			Files:   make(map[string]*File),
 			Package: astPackage,
@@ -95,6 +118,10 @@ func (p *Parser) parse(dir string, packages map[string]*ast.Package) {
 		p.Packages[dir] = pack
 
 		for _, astFile := range astPackage.Files {
+			if strings.Contains(astFile.Name.String(), "_test") {
+				continue
+			}
+
 			file := &File{
 				File:    astFile,
 				Imports: make(map[string]string),
@@ -106,7 +133,6 @@ func (p *Parser) parse(dir string, packages map[string]*ast.Package) {
 			for _, astDeclaration := range astFile.Decls {
 				if generalDeclaration, ok := astDeclaration.(*ast.GenDecl); ok {
 					for _, astSpec := range generalDeclaration.Specs {
-
 						if typeSpec, ok := astSpec.(*ast.ImportSpec); ok {
 							importPath := strings.Replace(typeSpec.Path.Value, "\"", "", -1)
 							packName := importPath
@@ -123,7 +149,7 @@ func (p *Parser) parse(dir string, packages map[string]*ast.Package) {
 						}
 
 						if typeSpec, ok := astSpec.(*ast.TypeSpec); ok {
-							p.parseTypeSpec(p.trimGoPath(dir), file, typeSpec)
+							p.parseTypeSpec(p.trimGoPath(dir), file, typeSpec, generalDeclaration.Doc)
 						}
 					}
 
@@ -133,18 +159,23 @@ func (p *Parser) parse(dir string, packages map[string]*ast.Package) {
 	}
 }
 
-func (p *Parser) parseTypeSpec(packname string, file *File, astType *ast.TypeSpec) *Type {
+func (p *Parser) parseTypeSpec(packname string, file *File, astType *ast.TypeSpec, doc *ast.CommentGroup) *Type {
 	name := packname + "." + astType.Name.String()
-	if _, ok := p.Types[name]; ok {
+	if _, ok := p.Types[name]; ok && p.Types[name].Type != "" {
 		return p.Types[name]
 	}
 
-	t := &Type{}
+	var t *Type
+	if _, ok := p.Types[name]; ok && p.Types[name].Type == "" {
+		t = p.Types[name]
+	} else {
+		t = &Type{}
+		p.Types[name] = t
+	}
+
 	t.Name = name
-	t.Comment = astType.Comment
-	t.Doc = astType.Doc
+	t.Doc = doc
 	p.parseType(packname, file, t, astType.Type)
-	p.Types[name] = t
 
 	return p.Types[name]
 }
@@ -156,9 +187,14 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 			t.Type = expr.String()
 		} else {
 			// composite in pkg
+			// t.composite = t.RefPackage + "." + t.RefTypeName
 			t.Type = "ref"
 			t.RefPackage = packname
 			t.RefTypeName = expr.String()
+			if _, ok := p.Types[t.RefPackage+"."+t.RefTypeName]; !ok {
+				p.Types[t.RefPackage+"."+t.RefTypeName] = &Type{}
+			}
+
 			t.RefType = p.Types[t.RefPackage+"."+t.RefTypeName]
 		}
 	case *ast.ArrayType:
@@ -186,7 +222,7 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 				t.RefPackage = val
 			}
 		}
-		p.parseFromGoPath(file.Imports[t.RefPackage])
+		p.ParseFromGoPath(file.Imports[t.RefPackage])
 		if ref, ok := p.Types[file.Imports[t.RefPackage]+"."+t.RefTypeName]; ok {
 			t.RefType = ref
 		}
@@ -196,18 +232,21 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 	case *ast.StructType:
 		t.Type = "struct"
 		t.Properties = make(map[string]*Type)
-		for i := 0; i < expr.Fields.NumFields(); i++ {
+		for j := 0; j < len(expr.Fields.List); j++ {
 			fieldType := &Type{}
-			isComposite := false
-			fieldType.Name, isComposite = p.readPropName(expr.Fields.List[i])
-			p.parseType(packname, file, fieldType, expr.Fields.List[i].Type)
+			fieldType.Name, fieldType.isComposite = p.readPropName(packname, file, expr.Fields.List[j])
+			fieldType.Doc = expr.Fields.List[j].Doc
+			fieldType.Comment = expr.Fields.List[j].Comment
+			if expr.Fields.List[j].Tag != nil {
+				fieldType.Tags = reflect.StructTag(strings.Trim(expr.Fields.List[j].Tag.Value, "`"))
+			}
 
 			// composite out side pkg
-			if isComposite && fieldType.RefType != nil && fieldType.RefType.Properties != nil {
-				for key, val := range fieldType.RefType.Properties {
-					t.Properties[key] = val
-				}
+			if fieldType.isComposite {
+				t.composite = append(t.composite, fieldType.Name)
+				p.useComposite = append(p.useComposite, t)
 			} else {
+				p.parseType(packname, file, fieldType, expr.Fields.List[j].Type)
 				t.Properties[fieldType.Name] = fieldType
 			}
 		}
@@ -216,9 +255,40 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 	}
 }
 
-func (p *Parser) readPropName(field *ast.Field) (string, bool) {
+func (p *Parser) readPropName(packname string, file *File, field *ast.Field) (string, bool) {
 	if len(field.Names) == 0 {
-		return "", true
+		propName := ""
+		if astSelectorExpr, ok := field.Type.(*ast.SelectorExpr); ok {
+			fieldPackName := astSelectorExpr.X.(*ast.Ident).Name
+			//check is alias
+			for key, val := range file.Alias {
+				if key == fieldPackName {
+					fieldPackName = val
+				}
+			}
+			propName = fieldPackName + "." + strings.TrimPrefix(astSelectorExpr.Sel.Name, "*")
+		} else if astTypeIdent, ok := field.Type.(*ast.Ident); ok {
+			propName = packname + "." + astTypeIdent.Name
+		} else if astStarExpr, ok := field.Type.(*ast.StarExpr); ok {
+			if astSelectorExpr, ok := astStarExpr.X.(*ast.SelectorExpr); ok {
+				fieldPackName := astSelectorExpr.X.(*ast.Ident).Name
+				//check is alias
+				for key, val := range file.Alias {
+					if key == fieldPackName {
+						fieldPackName = val
+					}
+				}
+				propName = fieldPackName + "." + strings.TrimPrefix(astSelectorExpr.Sel.Name, "*")
+			}
+
+			if astIdent, ok := astStarExpr.X.(*ast.Ident); ok {
+				propName = packname + "." + astIdent.Name
+			}
+		} else {
+			panic(fmt.Errorf("Something goes wrong: %#v", field.Type))
+		}
+
+		return propName, true
 	}
 
 	return field.Names[0].String(), false

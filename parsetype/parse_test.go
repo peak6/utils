@@ -12,6 +12,7 @@ func TestParse(t *testing.T) {
 	dir := path.Join(p, "testparse")
 	pretty.Println(dir)
 	parser := NewParser()
-	// parser.ParseDir(dir)
-	parser.ParseDir("/Users/witooh/dev/go/src/github.com/hyperworks/langfight/src/models")
+	parser.ParseDir(dir)
+	pretty.Println(parser.Types)
+	// parser.ParseDir("/Users/witooh/dev/go/src/github.com/hyperworks/langfight/src/models")
 }
