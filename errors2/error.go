@@ -17,7 +17,7 @@ type Error interface {
 type Errors2 struct {
 	httpStatus int    `json:"-"`
 	Err        string `json:"error,omitempty"`
-	Message    string `json:"error_description"`
+	Message    string `json:"message"`
 	ty         int    `json:"-"`
 }
 
