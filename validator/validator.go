@@ -1,9 +1,15 @@
 package validator
 
 import (
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
+)
+
+var (
+	emailPatern       = regexp.MustCompile(".+@.+\\..+")
+	dateiso8601Patern = regexp.MustCompile("^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(Z|(\\+|-)\\d{2}(:?\\d{2})?)$")
 )
 
 type ValidateError struct {
