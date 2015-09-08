@@ -23,10 +23,11 @@ type Package struct {
 }
 
 type File struct {
-	File      *ast.File
-	Imports   map[string]string
-	Alias     map[string]string
-	IsBuiltIn bool
+	File          *ast.File
+	Imports       map[string]string
+	Alias         map[string]string
+	StaticImports []string
+	IsBuiltIn     bool
 }
 
 type Type struct {
@@ -81,18 +82,19 @@ func (p *Parser) ParseDir(dir string) {
 
 func (p *Parser) trimGoPath(s string) string {
 	paths := os.Getenv("GOPATH")
+	paths = paths + ":" + os.Getenv("GOROOT")
 	goPaths := strings.Split(paths, ":")
 	for i := 0; i < len(goPaths); i++ {
 		if strings.HasPrefix(s, goPaths[i]) {
 			return strings.TrimPrefix(s, path.Join(goPaths[i], "src")+"/")
 		}
 	}
-
 	return s
 }
 
 func (p *Parser) ParseFromGoPath(dir string) {
 	paths := os.Getenv("GOPATH")
+	paths = paths + ":" + os.Getenv("GOROOT")
 	goPaths := strings.Split(paths, ":")
 	for i := 0; i < len(goPaths); i++ {
 		p.ParseDir(path.Join(goPaths[i], "src", dir))
@@ -141,7 +143,13 @@ func (p *Parser) parse(dir string, packages map[string]*ast.Package) {
 							}
 
 							if typeSpec.Name != nil {
-								file.Alias[typeSpec.Name.String()] = packName
+								name := typeSpec.Name.String()
+								if name == "." {
+									file.StaticImports = append(file.StaticImports, packName)
+									p.ParseFromGoPath(importPath)
+								} else {
+									file.Alias[typeSpec.Name.String()] = packName
+								}
 							}
 
 							file.Imports[packName] = importPath
@@ -190,8 +198,23 @@ func (p *Parser) parseType(packname string, file *File, t *Type, astType ast.Exp
 			t.Type = "ref"
 			t.RefPackage = packname
 			t.RefTypeName = expr.String()
+
 			if _, ok := p.Types[t.RefPackage+"."+t.RefTypeName]; !ok {
-				p.Types[t.RefPackage+"."+t.RefTypeName] = &Type{}
+				found := false
+				for _, pkg := range file.StaticImports {
+					n := file.Imports[pkg] + "." + t.RefTypeName
+					yo := p.Types[n]
+					if yo != nil {
+						t.RefPackage = file.Imports[pkg]
+						x := t.RefPackage + "." + t.RefTypeName
+						p.Types[x] = yo
+						found = true
+						break
+					}
+				}
+				if !found {
+					p.Types[t.RefPackage+"."+t.RefTypeName] = &Type{}
+				}
 			}
 
 			t.RefType = p.Types[t.RefPackage+"."+t.RefTypeName]
